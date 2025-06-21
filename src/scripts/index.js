@@ -23,10 +23,12 @@ document.getElementById('input-search').addEventListener('keyup', (e) => {
     const isEnterkeyPressed = key === 13
 
     if (isEnterkeyPressed) {
-        validateInput(userName)
-        getUserProfile(userName)
+        if (validateEmptyInput(userName)) return
+        getUserData(userName)
+
     }
 })
+
 async function getUserData(userName) {
 
     const userResponse = await getUser(userName)
