@@ -4,6 +4,9 @@ import { getRepositories } from './services/repositories.js'
 import { user } from './objects/user.js'
 import { screen } from './objects/screen.js'
 
+
+
+
 document.getElementById('btn-search').addEventListener('click', () => {
     const userName = document.getElementById('input-search').value
     if (validateEmptyInput(userName)) return
@@ -41,4 +44,34 @@ async function getUserData(userName) {
     user.setRepositories(repositoresResponse)
 
     screen.renderUser(user)
+    buscarEventosDoUsuario(userName);
+
+
+}
+
+async function buscarEventosDoUsuario(username) {
+  const url = `https://api.github.com/users/${username}/events`;
+  const resposta = await fetch(url);
+  const eventos = await resposta.json();
+
+    const eventosFiltrados = eventos.filter(evento => 
+    evento.type === 'PushEvent' || evento.type === 'CreateEvent'
+  ).slice(0, 10)
+
+  screen.renderEvents(eventosFiltrados)
+
+
+  eventosFiltrados.forEach(evento => {
+    const repoNome = evento.repo.name;
+
+    if (evento.type === 'PushEvent') {
+      evento.payload.commits.forEach(commit => {
+        console.log(`Repositório: ${repoNome}`);
+        console.log(`Mensagem: ${commit.message}`);
+      });
+    } else if (evento.type === 'CreateEvent') {
+      console.log(`Repositório: ${repoNome}`);
+      console.log(`Mensagem: Sem mensagem de commit`);
+    }  
+  });
 }
